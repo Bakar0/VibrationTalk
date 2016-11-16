@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
@@ -57,7 +58,17 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
     private View mTopBarContainer;
     private View mSettingsContainer;
     private String mChannelUrl;
+    private static long startTime;
 
+    protected static long getStartTime()
+    {
+        return startTime;
+    }
+
+    protected static void setStartTime(long time)
+    {
+        startTime = time;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -196,6 +207,9 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private PreviousMessageListQuery mPrevMessageListQuery;
         private boolean mIsUploading;
 
+        private Button VibratBtn;
+
+
         public SendBirdChatFragment() {
         }
 
@@ -256,6 +270,11 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 mGroupChannel.markAsRead();
                                 mAdapter.appendMessage(baseMessage);
                                 mAdapter.notifyDataSetChanged();
+
+                                String str = ((UserMessage)baseMessage).getMessage();
+                                Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                                v.vibrate(Integer.parseInt(str));
+
                             }
                         }
                     }
@@ -310,11 +329,35 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             mProgressBtnUpload = (ProgressBar) rootView.findViewById(R.id.progress_btn_upload);
             mEtxtMessage = (EditText) rootView.findViewById(R.id.etxt_message);
 
+            VibratBtn = (Button) rootView.findViewById(R.id.buttonSend);
+            VibratBtn.setOnTouchListener(new View.OnTouchListener(){
+
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+
+                    switch (motionEvent.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            // Vibrate for 1000 milliseconds
+                            SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
+                            //send("start");
+                            return true;
+                        case MotionEvent.ACTION_UP:
+                            //stop vibration
+                            long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
+                            send(time+"");
+                            return true;
+                    }
+                    return false;
+                }
+            });
+
+
             mBtnSend.setEnabled(false);
             mBtnSend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    send();
+                    send("");
                 }
             });
 
@@ -342,7 +385,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                 public boolean onKey(View v, int keyCode, KeyEvent event) {
                     if (keyCode == KeyEvent.KEYCODE_ENTER) {
                         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                            send();
+                            send("");
                         }
                         return true; // Do not hide keyboard.
                     }
@@ -481,12 +524,12 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             }
         }
 
-        private void send() {
+        private void send(String str) {
             if (mEtxtMessage.getText().length() <= 0) {
                 return;
             }
 
-            mGroupChannel.sendUserMessage(mEtxtMessage.getText().toString(), new BaseChannel.SendUserMessageHandler() {
+            mGroupChannel.sendUserMessage(str, new BaseChannel.SendUserMessageHandler() {
                 @Override
                 public void onSent(UserMessage userMessage, SendBirdException e) {
                     if (e != null) {
