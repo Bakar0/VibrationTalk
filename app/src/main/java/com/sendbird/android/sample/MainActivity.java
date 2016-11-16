@@ -126,21 +126,18 @@ public class MainActivity extends FragmentActivity {
             case DISCONNECTED:
                 ((Button) findViewById(R.id.btn_connect)).setText("Connect");
                 findViewById(R.id.btn_connect).setEnabled(true);
-                findViewById(R.id.btn_open_channel_list).setEnabled(false);
                 findViewById(R.id.btn_group_channel_list).setEnabled(false);
                 break;
 
             case CONNECTING:
                 ((Button) findViewById(R.id.btn_connect)).setText("Connecting...");
                 findViewById(R.id.btn_connect).setEnabled(false);
-                findViewById(R.id.btn_open_channel_list).setEnabled(false);
                 findViewById(R.id.btn_group_channel_list).setEnabled(false);
                 break;
 
             case CONNECTED:
                 ((Button) findViewById(R.id.btn_connect)).setText("Disconnect");
                 findViewById(R.id.btn_connect).setEnabled(true);
-                findViewById(R.id.btn_open_channel_list).setEnabled(true);
                 findViewById(R.id.btn_group_channel_list).setEnabled(true);
                 break;
         }

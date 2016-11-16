@@ -21,11 +21,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SendBirdOpenChatActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="SendBird"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"></activity>
-        <activity
             android:name=".SendBirdUserListActivity"
             android:configChanges="orientation|screenSize"
             android:label="SendBird"
@@ -42,11 +37,6 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"></activity>
         <activity
             android:name=".SendBirdParticipantListActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="SendBird"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"></activity>
-        <activity
-            android:name=".SendBirdOpenChannelListActivity"
             android:configChanges="orientation|screenSize"
             android:label="SendBird"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"></activity>
