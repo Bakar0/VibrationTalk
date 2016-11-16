@@ -61,6 +61,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
     private String mChannelUrl;
     private static long startTime;
 
+
     protected static long getStartTime()
     {
         return startTime;
@@ -208,6 +209,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private PreviousMessageListQuery mPrevMessageListQuery;
         private boolean mIsUploading;
 
+        private StopWatch stopWatch;
+        private String message;
         private Button VibratBtn;
 
 
@@ -217,7 +220,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.sendbird_fragment_group_chat, container, false);
-
+            stopWatch = new StopWatch();
+            message ="";
             mChannelUrl = getArguments().getString("channel_url");
 
             initUIComponents(rootView);
@@ -275,13 +279,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 String str = ((UserMessage)baseMessage).getMessage();
                                 Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
                                 v.vibrate(Integer.parseInt(str));
-                                //starting count
-                                new Thread( new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        //check time
-                                    }
-                                }).start();
+
                             }
                         }
                     }
@@ -348,11 +346,22 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                             // Vibrate for 1000 milliseconds
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
                             //send("start");
+                            message += stopWatch.getElapsedTime()+":";
+                            stopWatch.clear();
                             return true;
                         case MotionEvent.ACTION_UP:
                             //stop vibration
                             long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
-                            send(time+"");
+                            message += time+":";
+                            //send(time+"");
+                            stopWatch.start();
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    send(message);
+                                }
+                            }).start();
                             return true;
                     }
                     return false;
