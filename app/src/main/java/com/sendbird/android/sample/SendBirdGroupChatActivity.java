@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -274,7 +275,13 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 String str = ((UserMessage)baseMessage).getMessage();
                                 Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
                                 v.vibrate(Integer.parseInt(str));
-
+                                //starting count
+                                new Thread( new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //check time
+                                    }
+                                }).start();
                             }
                         }
                     }
