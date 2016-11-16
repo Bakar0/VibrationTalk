@@ -358,8 +358,11 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {
-
+                                    while (stopWatch.getElapsedTime()<2000) {
+                                    };
                                     send(message);
+                                    message = "";
+                                    stopWatch.clear();
                                 }
                             }).start();
                             return true;

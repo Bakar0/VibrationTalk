@@ -17,13 +17,25 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             >
-        <Button
-            android:text="Button"
-            android:layout_width="match_parent"
-            android:layout_height="255dp"
-            android:id="@+id/buttonVibration" />
 
-        <ListView
+            <Button
+                android:id="@+id/buttonVibration"
+
+                android:text="Button"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+
+                android:layout_width="match_parent"
+                android:layout_height="277dp"
+                android:background="@drawable/custombutton"
+                android:shadowColor="#A8A8A8"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="5"
+                style="@android:style/Widget.DeviceDefault.Button.Borderless"
+                android:contextClickable="true" />
+
+            <ListView
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
