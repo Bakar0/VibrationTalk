@@ -329,7 +329,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             mProgressBtnUpload = (ProgressBar) rootView.findViewById(R.id.progress_btn_upload);
             mEtxtMessage = (EditText) rootView.findViewById(R.id.etxt_message);
 
-            VibratBtn = (Button) rootView.findViewById(R.id.buttonSend);
+            VibratBtn = (Button) rootView.findViewById(R.id.buttonVibration);
             VibratBtn.setOnTouchListener(new View.OnTouchListener(){
 
                 @Override
@@ -352,12 +352,26 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                 }
             });
 
+            mBtnSend.setEnabled(true);
+            mBtnSend.setOnTouchListener(new View.OnTouchListener(){
 
-            mBtnSend.setEnabled(false);
-            mBtnSend.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    send("");
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+
+                    switch (motionEvent.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            // Vibrate for 1000 milliseconds
+                            SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
+                            //send("start");
+                            return true;
+                        case MotionEvent.ACTION_UP:
+                            //stop vibration
+                            long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
+                            send(time+"");
+                            return true;
+                    }
+                    return false;
                 }
             });
 
@@ -405,13 +419,13 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    mBtnSend.setEnabled(s.length() > 0);
+                    //mBtnSend.setEnabled(s.length() > 0);
 
-                    if (s.length() == 1) {
-                        mGroupChannel.startTyping();
-                    } else if (s.length() <= 0) {
-                        mGroupChannel.endTyping();
-                    }
+                   // if (s.length() == 1) {
+                   //     mGroupChannel.startTyping();
+                  //  } else if (s.length() <= 0) {
+                   //     mGroupChannel.endTyping();
+                  //  }
                 }
             });
 
@@ -525,9 +539,9 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         }
 
         private void send(String str) {
-            if (mEtxtMessage.getText().length() <= 0) {
-                return;
-            }
+            //if (mEtxtMessage.getText().length() <= 0) {
+             //   return;
+           // }
 
             mGroupChannel.sendUserMessage(str, new BaseChannel.SendUserMessageHandler() {
                 @Override

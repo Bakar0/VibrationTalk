@@ -5,33 +5,38 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-
     <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.10"
-        android:layout_width="match_parent">
+        android:layout_weight="1"
+        >
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+        <Button
+            android:text="Button"
+            android:layout_width="match_parent"
+            android:layout_height="255dp"
+            android:id="@+id/buttonVibration" />
 
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="8dp"
+            android:transcriptMode="normal"
+            >
+        </ListView>
+        </LinearLayout>
         <View
             android:layout_width="match_parent"
             android:layout_height="4dp"
             android:background="@drawable/sendbird_img_shadow"
             />
-
-        <ListView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:paddingBottom="8dp"
-            android:transcriptMode="normal"
-            android:visibility="invisible">
-        </ListView>
-
-        <Button
-            android:text="Button"
-            android:layout_width="match_parent"
-            android:layout_height="214dp"
-            android:id="@+id/buttonSend" />
-
     </FrameLayout>
 
     <RelativeLayout
@@ -39,7 +44,7 @@
         android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:background="#ffffff"
-        android:visibility="invisible">
+        >
         <View
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
