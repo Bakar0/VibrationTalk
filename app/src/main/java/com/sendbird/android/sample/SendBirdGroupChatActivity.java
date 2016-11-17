@@ -257,11 +257,11 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private PreviousMessageListQuery mPrevMessageListQuery;
         private boolean mIsUploading;
 
+        private TextView timeView;
         private StopWatch stopWatch;
         private String message;
         private Button VibratBtn;
         private boolean inThread;
-
         public SendBirdChatFragment() {
         }
 
@@ -271,6 +271,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             stopWatch = new StopWatch();
             message = "";
             inThread = false;
+            timeView =(TextView)rootView.findViewById(R.id.textViewTime);
+
             mChannelUrl = getArguments().getString("channel_url");
 
             initUIComponents(rootView);
@@ -410,13 +412,16 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                     @Override
                                     public void run() {
                                         while (stopWatch.getElapsedTime() < 5000) {
+
                                         }
-                                        send(message);
+                                        send(message+"("+stopWatch.getElapsedTime()+")");
+
                                         message = "";
                                         stopWatch.clear();
                                         inThread = false;
                                 }
-                            }).start();}
+                            }).start();
+                            }
                             return true;
                     }
                     return false;
