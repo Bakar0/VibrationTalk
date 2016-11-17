@@ -39,6 +39,7 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:9.6.1'
     compile 'org.apache.commons:commons-lang3:3.4'
 
+    compile 'com.google.android.gms:play-services-appindexing:9.6.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

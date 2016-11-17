@@ -17,6 +17,7 @@ import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,6 +36,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.sendbird.android.AdminMessage;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
@@ -60,17 +65,21 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
     private View mSettingsContainer;
     private String mChannelUrl;
     private static long startTime;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
 
-    protected static long getStartTime()
-    {
+    protected static long getStartTime() {
         return startTime;
     }
 
-    protected static void setStartTime(long time)
-    {
+    protected static void setStartTime(long time) {
         startTime = time;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +89,9 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
         initFragment();
         initUIComponents();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -193,6 +205,42 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         resizeMenubar();
     }
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("SendBirdGroupChat Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
+
     public static class SendBirdChatFragment extends Fragment {
         private static final int REQUEST_PICK_IMAGE = 100;
         private static final int REQUEST_INVITE_USERS = 200;
@@ -212,7 +260,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private StopWatch stopWatch;
         private String message;
         private Button VibratBtn;
-
+        private boolean inThread;
 
         public SendBirdChatFragment() {
         }
@@ -221,7 +269,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.sendbird_fragment_group_chat, container, false);
             stopWatch = new StopWatch();
-            message ="";
+            message = "";
+            inThread = false;
             mChannelUrl = getArguments().getString("channel_url");
 
             initUIComponents(rootView);
@@ -276,7 +325,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 mAdapter.appendMessage(baseMessage);
                                 mAdapter.notifyDataSetChanged();
 
-                                String str = ((UserMessage)baseMessage).getMessage();
+                                String str = ((UserMessage) baseMessage).getMessage();
                                 Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
                                 v.vibrate(Integer.parseInt(str));
 
@@ -335,36 +384,39 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             mEtxtMessage = (EditText) rootView.findViewById(R.id.etxt_message);
 
             VibratBtn = (Button) rootView.findViewById(R.id.buttonVibration);
-            VibratBtn.setOnTouchListener(new View.OnTouchListener(){
+            VibratBtn.setOnTouchListener(new View.OnTouchListener() {
 
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
 
-                    switch (motionEvent.getAction()){
+                    switch (motionEvent.getAction()) {
                         case MotionEvent.ACTION_DOWN:
+                            message += stopWatch.getElapsedTime() + ":";
+                            stopWatch.clear();
                             // Vibrate for 1000 milliseconds
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
                             //send("start");
-                            message += stopWatch.getElapsedTime()+":";
-                            stopWatch.clear();
                             return true;
                         case MotionEvent.ACTION_UP:
                             //stop vibration
                             long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
-                            message += time+":";
+                            message += time + ":";
                             //send(time+"");
                             stopWatch.start();
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    while (stopWatch.getElapsedTime()<2000) {
-                                    };
-                                    send(message);
-                                    message = "";
-                                    stopWatch.clear();
+                            if(!inThread){
+                                inThread = true;
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        while (stopWatch.getElapsedTime() < 5000) {
+                                        }
+                                        send(message);
+                                        message = "";
+                                        stopWatch.clear();
+                                        inThread = false;
                                 }
-                            }).start();
+                            }).start();}
                             return true;
                     }
                     return false;
@@ -372,13 +424,13 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             });
 
             mBtnSend.setEnabled(true);
-            mBtnSend.setOnTouchListener(new View.OnTouchListener(){
+            mBtnSend.setOnTouchListener(new View.OnTouchListener() {
 
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
 
-                    switch (motionEvent.getAction()){
+                    switch (motionEvent.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             // Vibrate for 1000 milliseconds
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
@@ -387,7 +439,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                         case MotionEvent.ACTION_UP:
                             //stop vibration
                             long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
-                            send(time+"");
+                            send(time + "");
                             return true;
                     }
                     return false;
@@ -440,11 +492,11 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                 public void afterTextChanged(Editable s) {
                     //mBtnSend.setEnabled(s.length() > 0);
 
-                   // if (s.length() == 1) {
-                   //     mGroupChannel.startTyping();
-                  //  } else if (s.length() <= 0) {
-                   //     mGroupChannel.endTyping();
-                  //  }
+                    // if (s.length() == 1) {
+                    //     mGroupChannel.startTyping();
+                    //  } else if (s.length() <= 0) {
+                    //     mGroupChannel.endTyping();
+                    //  }
                 }
             });
 
@@ -559,8 +611,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
         private void send(String str) {
             //if (mEtxtMessage.getText().length() <= 0) {
-             //   return;
-           // }
+            //   return;
+            // }
 
             mGroupChannel.sendUserMessage(str, new BaseChannel.SendUserMessageHandler() {
                 @Override
