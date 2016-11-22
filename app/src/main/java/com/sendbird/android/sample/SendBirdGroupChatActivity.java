@@ -331,7 +331,10 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
                                 String str = ((UserMessage) baseMessage).getMessage();
                                 Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
-                                v.vibrate(Integer.parseInt(str));
+                                if (!str.equals("0"))
+                                    v.vibrate(Integer.parseInt(str));
+                                else
+                                    v.cancel();
 
                             }
                         }
@@ -401,28 +404,15 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                             stopWatch.clear();
                             // Vibrate for 1000 milliseconds
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
-                            //send("start");
+                            send("10000");
                             return true;
                         case MotionEvent.ACTION_UP:
                             VibratBtn.setBackgroundResource(R.drawable.not_pressed);
                             //stop vibration
                             long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
-                            message += time + ":";
-                            stopWatch.start();
-                            if(!inThread){
-                                inThread = true;
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        while (stopWatch.getElapsedTime() < 5000) {
-                                        }
-                                        send(message+"("+stopWatch.getElapsedTime()+")");
-                                        message = "";
-                                        stopWatch.clear();
-                                        inThread = false;
-                                }
-                            }).start();
-                            }
+                            message += time;
+                            //send(time+"");
+                            send("0");
                             return true;
                     }
                     return false;

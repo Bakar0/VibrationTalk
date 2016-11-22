@@ -28,10 +28,10 @@
                 android:shadowDx="0"
                 android:shadowDy="0"
                 android:shadowRadius="5"
-                style="@android:style/Widget.DeviceDefault.Button.Borderless"
                 android:contextClickable="true"
                 android:text="Vibrate"
-                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large.Inverse" />
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"
+                style="@android:style/Widget.Button" />
 
             <ListView
             android:id="@+id/list"
