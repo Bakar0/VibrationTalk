@@ -1,4 +1,5 @@
 package com.sendbird.android.sample;
+import 	android.os.SystemClock;
 
 /**
  * Created by Brkmo on 16/11/2016.
@@ -16,15 +17,18 @@ public class StopWatch {
 
     public void start(){
         startTime = System.currentTimeMillis();
+        //startTime = SystemClock.elapsedRealtime();
         running = true;
     }
     public void stop(){
         stopTime = System.currentTimeMillis();
+        //stopTime = SystemClock.elapsedRealtime();
         running = false;
     }
     public long getElapsedTime(){
         if(running)
             return System.currentTimeMillis() - startTime;
+            //return  SystemClock.elapsedRealtime() - startTime;
         else
             return stopTime - startTime;
     }

@@ -35,7 +35,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.os.SystemClock;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
@@ -262,8 +262,11 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private String message;
         private Button VibratBtn;
         private boolean inThread;
+
         public SendBirdChatFragment() {
         }
+
+
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -272,7 +275,6 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             message = "";
             inThread = false;
             timeView =(TextView)rootView.findViewById(R.id.textViewTime);
-
             mChannelUrl = getArguments().getString("channel_url");
 
             initUIComponents(rootView);
@@ -394,6 +396,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
                     switch (motionEvent.getAction()) {
                         case MotionEvent.ACTION_DOWN:
+                            VibratBtn.setBackgroundResource(R.drawable.pressed);
                             message += stopWatch.getElapsedTime() + ":";
                             stopWatch.clear();
                             // Vibrate for 1000 milliseconds
@@ -401,10 +404,10 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                             //send("start");
                             return true;
                         case MotionEvent.ACTION_UP:
+                            VibratBtn.setBackgroundResource(R.drawable.not_pressed);
                             //stop vibration
                             long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
                             message += time + ":";
-                            //send(time+"");
                             stopWatch.start();
                             if(!inThread){
                                 inThread = true;
@@ -412,10 +415,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                     @Override
                                     public void run() {
                                         while (stopWatch.getElapsedTime() < 5000) {
-
                                         }
                                         send(message+"("+stopWatch.getElapsedTime()+")");
-
                                         message = "";
                                         stopWatch.clear();
                                         inThread = false;
