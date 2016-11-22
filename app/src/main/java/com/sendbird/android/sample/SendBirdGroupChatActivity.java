@@ -57,6 +57,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SendBirdGroupChatActivity extends FragmentActivity {
     private SendBirdChatFragment mSendBirdMessagingFragment;
@@ -262,7 +265,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private String message;
         private Button VibratBtn;
         private boolean inThread;
-
+        private Semaphore sem;
+        private Lock lock;
         public SendBirdChatFragment() {
         }
 
@@ -276,6 +280,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             inThread = false;
             timeView =(TextView)rootView.findViewById(R.id.textViewTime);
             mChannelUrl = getArguments().getString("channel_url");
+            sem = new Semaphore(1,true);
+            lock = new ReentrantLock();
 
             initUIComponents(rootView);
             return rootView;
@@ -404,7 +410,10 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                             stopWatch.clear();
                             // Vibrate for 1000 milliseconds
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
+                            lock.lock();
                             send("10000");
+                            //sem.acquire();
+
                             return true;
                         case MotionEvent.ACTION_UP:
                             VibratBtn.setBackgroundResource(R.drawable.not_pressed);
@@ -412,7 +421,10 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                             long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
                             message += time;
                             //send(time+"");
+
+                            //sema --;
                             send("0");
+                            //LockR
                             return true;
                     }
                     return false;
@@ -442,24 +454,6 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                 }
             });
 
-            mBtnUpload.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (Helper.requestReadWriteStoragePermissions(getActivity())) {
-                        mIsUploading = true;
-                        Intent intent = new Intent();
-                        intent.setType("image/*");
-                        intent.setAction(Intent.ACTION_GET_CONTENT);
-                        startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_PICK_IMAGE);
-
-                        /**
-                         * Set this as false to maintain SendBird connection,
-                         * even when an external Activity is started.
-                         */
-                        SendBird.setAutoBackgroundDetection(false);
-                    }
-                }
-            });
 
             mEtxtMessage.setOnKeyListener(new View.OnKeyListener() {
                 @Override
