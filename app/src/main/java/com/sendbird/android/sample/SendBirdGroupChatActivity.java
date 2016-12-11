@@ -11,6 +11,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -263,7 +264,9 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private TextView timeView;
         private StopWatch stopWatch;
         private String message;
-        private Button VibratBtn;
+        private long btn_pressed_time;
+        private long time;
+        public static Button VibratBtn;
         private boolean inThread;
         private Semaphore sem;
         private Lock lock;
@@ -278,10 +281,11 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             stopWatch = new StopWatch();
             message = "";
             inThread = false;
+            btn_pressed_time = 0;
             timeView =(TextView)rootView.findViewById(R.id.textViewTime);
             mChannelUrl = getArguments().getString("channel_url");
-            sem = new Semaphore(1,true);
-            lock = new ReentrantLock();
+            //sem = new Semaphore(1,true);
+            //lock = new ReentrantLock();
 
             initUIComponents(rootView);
             return rootView;
@@ -324,6 +328,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
         @Override
         public void onResume() {
+
             super.onResume();
             if (!mIsUploading) {
                 SendBird.addChannelHandler(identifier, new SendBird.ChannelHandler() {
@@ -387,6 +392,10 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             }
         }
 
+        private void turnOnButton(){
+            VibratBtn.setBackgroundResource(R.drawable.not_pressed);
+            VibratBtn.setEnabled(true);
+        }
         private void initUIComponents(View rootView) {
             mListView = (ListView) rootView.findViewById(R.id.list);
             turnOffListViewDecoration(mListView);
@@ -405,26 +414,38 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
                     switch (motionEvent.getAction()) {
                         case MotionEvent.ACTION_DOWN:
+                            //stopWatch.clear();
                             VibratBtn.setBackgroundResource(R.drawable.pressed);
-                            message += stopWatch.getElapsedTime() + ":";
-                            stopWatch.clear();
+                            stopWatch.start();
+                            //message += stopWatch.getElapsedTime() + ":";
+                            //stopWatch.clear();
                             // Vibrate for 1000 milliseconds
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
-                            lock.lock();
-                            send("10000");
-                            //sem.acquire();
+                            //send("");
 
                             return true;
                         case MotionEvent.ACTION_UP:
-                            VibratBtn.setBackgroundResource(R.drawable.not_pressed);
+                            VibratBtn.setBackgroundResource(R.drawable.disabled);
                             //stop vibration
-                            long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
+                            time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
                             message += time;
-                            //send(time+"");
+                            send(time+"");
+                            btn_pressed_time = stopWatch.getElapsedTime();
+                            VibratBtn.setBackgroundResource(R.drawable.disabled);
+                            VibratBtn.setEnabled(false);
+                            stopWatch.clear();
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Thread.sleep(time);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    //turnOnButton();
+                                }
+                            }).start();
 
-                            //sema --;
-                            send("0");
-                            //LockR
                             return true;
                     }
                     return false;
