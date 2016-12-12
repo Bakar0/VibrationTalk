@@ -42,7 +42,7 @@ public class MainActivity extends FragmentActivity {
 
         sUserId = getPreferences(Context.MODE_PRIVATE).getString("user_id", "");
         mNickname = getPreferences(Context.MODE_PRIVATE).getString("nickname", "");
-
+        findViewById(R.id.btn_group_channel_list).setEnabled(false);
         SendBird.init(appId, this);
 
         ((EditText) findViewById(R.id.etxt_user_id)).setText(sUserId);
@@ -77,6 +77,22 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
+        final Button sndBtn = (Button) findViewById(R.id.btn_connect);
+        findViewById(R.id.btn_connect).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Button btn = (Button) v;
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        sndBtn.setBackgroundResource(R.drawable.oressed);
+                        return false;
+                    case MotionEvent.ACTION_UP:
+                        sndBtn.setBackgroundResource(R.drawable.notpressed);
+                        return false;
+                }
+                return false;
+            }
+        });
 
         findViewById(R.id.btn_connect).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,8 +107,38 @@ public class MainActivity extends FragmentActivity {
                 Helper.hideKeyboard(MainActivity.this);
             }
         });
+////////////////////////////////////
+        final Button tmpBtn = (Button) findViewById(R.id.btn_group_channel_list);
+        findViewById(R.id.btn_group_channel_list).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Button btn = (Button) v;
+                if(btn.isEnabled()) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            tmpBtn.setBackgroundResource(R.drawable.oressed);
+                            return false;
+                        case MotionEvent.ACTION_UP:
+                            tmpBtn.setBackgroundResource(R.drawable.notpressed);
+                            return false;
+                    }
+                }
+                return false;
+            }
+        });
 
-        setState(State.DISCONNECTED);
+        findViewById(R.id.btn_group_channel_list).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Button btn = (Button) view;
+                if (btn.isEnabled()) {
+                    Intent intent = new Intent(MainActivity.this, SendBirdGroupChannelListActivity.class);
+                    startActivity(intent);
+                }
+
+                Helper.hideKeyboard(MainActivity.this);
+            }
+        });
     }
 
     @Override
@@ -127,6 +173,8 @@ public class MainActivity extends FragmentActivity {
                 ((Button) findViewById(R.id.btn_connect)).setText("Connect");
                 findViewById(R.id.btn_connect).setEnabled(true);
                 findViewById(R.id.btn_group_channel_list).setEnabled(false);
+                findViewById(R.id.btn_group_channel_list).setBackgroundResource(R.drawable.disable);
+
                 break;
 
             case CONNECTING:
@@ -139,6 +187,7 @@ public class MainActivity extends FragmentActivity {
                 ((Button) findViewById(R.id.btn_connect)).setText("Disconnect");
                 findViewById(R.id.btn_connect).setEnabled(true);
                 findViewById(R.id.btn_group_channel_list).setEnabled(true);
+                findViewById(R.id.btn_group_channel_list).setBackgroundResource(R.drawable.notpressed);
                 break;
         }
     }
