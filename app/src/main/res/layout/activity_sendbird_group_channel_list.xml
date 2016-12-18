@@ -41,7 +41,7 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="#ffffff"
-                    android:text="My Group Channels"
+                    android:text="My Groups"
                     />
             </RelativeLayout>
             <ImageButton

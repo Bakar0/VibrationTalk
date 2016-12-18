@@ -62,7 +62,7 @@
             android:layout_width="283dp"
             android:layout_height="52dp"
             android:layout_gravity="center_horizontal"
-            android:text="Group Channel"
+            android:text="My Groups"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="49dp"

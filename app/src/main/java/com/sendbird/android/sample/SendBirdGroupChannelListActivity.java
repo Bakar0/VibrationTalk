@@ -144,8 +144,8 @@ public class SendBirdGroupChannelListActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
                 new AlertDialog.Builder(SendBirdGroupChannelListActivity.this)
-                        .setTitle("SendBird")
-                        .setMessage("SendBird SDK " + SendBird.getSDKVersion())
+                        .setTitle("TouchMe")
+                        .setMessage("TouchMe " + "1.0")
                         .setPositiveButton("OK", null).create().show();
 
                 mSettingsContainer.setVisibility(View.GONE);
