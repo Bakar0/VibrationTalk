@@ -297,14 +297,16 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             mChannelUrl = getArguments().getString("channel_url");
             sem = new Semaphore(1,true);
             lock = new ReentrantLock();
+            send("0:SYN:666");
             Thread thread= new Thread(new Runnable() {
                 @Override
                 public void run() {
                     long seq =0;
                     while (true) {
-
                         Collections.sort(messages);
                         if(!messages.isEmpty()){
+                            if(messages.get(0).getCmd().equals("SYN"))
+                                seq = messages.get(0).getSeqNum();
                             if(messages.get(0).getSeqNum() == seq +1) {
                                 lock.lock();
                                 seq++;
