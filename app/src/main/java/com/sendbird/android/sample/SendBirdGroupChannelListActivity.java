@@ -426,8 +426,9 @@ public class SendBirdGroupChannelListActivity extends FragmentActivity {
             GroupChannel item = getItem(position);
             viewHolder = (ViewHolder) convertView.getTag();
             Helper.displayUrlImage(viewHolder.getView("img_thumbnail", ImageView.class), Helper.getDisplayCoverImageUrl(item.getMembers()));
-            viewHolder.getView("txt_topic", TextView.class).setText(Helper.getDisplayMemberNames(item.getMembers(), false));
-
+            viewHolder.getView("txt_topic",TextView.class).setText(item.getName().toString());
+            //viewHolder.getView("txt_topic", TextView.class).setText(Helper.getDisplayMemberNames(item.getMembers(), false));
+//
             if (item.getUnreadMessageCount() > 0) {
                 viewHolder.getView("txt_unread_count", TextView.class).setVisibility(View.VISIBLE);
                 viewHolder.getView("txt_unread_count", TextView.class).setText("" + item.getUnreadMessageCount());

@@ -297,7 +297,6 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             mChannelUrl = getArguments().getString("channel_url");
             sem = new Semaphore(1,true);
             lock = new ReentrantLock();
-            send("0:SYN:666");
             Thread thread= new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -347,7 +346,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         }
 
         private void updateGroupChannelTitle() {
-            ((TextView) getActivity().findViewById(R.id.txt_channel_name)).setText(Helper.getDisplayMemberNames(mGroupChannel.getMembers(), true));
+            ((TextView) getActivity().findViewById(R.id.txt_channel_name)).setText("Group: "+mGroupChannel.getName().toString());
         }
 
         @Override
