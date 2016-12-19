@@ -74,7 +74,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
     private String mChannelUrl;
     private static long startTime;
     public static long stopTime;
-    public static long seqNum=1;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -274,6 +274,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private boolean inThread;
         private Semaphore sem;
         private Lock lock;
+        public static long seqNum;
         public SendBirdChatFragment() {
         }
 
@@ -291,6 +292,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             stopWatch = new StopWatch();
             messages = new ArrayList<>();
             inThread = false;
+            seqNum=1;
             timeView =(TextView)rootView.findViewById(R.id.textViewTime);
             mChannelUrl = getArguments().getString("channel_url");
             sem = new Semaphore(1,true);
@@ -302,16 +304,19 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                     while (true) {
 
                         Collections.sort(messages);
-                        if(messages.get(0).getSeqNum() == seq +1) {
-                            lock.lock();
-                            seq++;
-                            vibrate(messages.get(0));
-                            messages.remove(0);
-                            lock.unlock();
+                        if(!messages.isEmpty()){
+                            if(messages.get(0).getSeqNum() == seq +1) {
+                                lock.lock();
+                                seq++;
+                                vibrate(messages.get(0));
+                                messages.remove(0);
+                                lock.unlock();
+                            }
                         }
                     }
                 }
             });
+            thread.start();
             initUIComponents(rootView);
             return rootView;
         }
@@ -367,7 +372,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 String str = ((UserMessage) baseMessage).getMessage();
                                 lock.lock();
                                 String[] msg = str.split(":");
-                                messages.add(new Message(Long.parseLong(msg[0]),msg[1],Long.parseLong(msg[3])));
+                                messages.add(new Message(Long.parseLong(msg[0]),msg[1],Long.parseLong(msg[2])));
                                 lock.unlock();
                             }
                         }
