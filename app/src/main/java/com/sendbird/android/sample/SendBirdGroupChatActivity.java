@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -62,6 +63,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static android.R.id.message;
 
 public class SendBirdGroupChatActivity extends FragmentActivity {
     private SendBirdChatFragment mSendBirdMessagingFragment;
@@ -266,7 +269,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
         private TextView timeView;
         private StopWatch stopWatch;
-        private List<String> messages;
+        private ArrayList<Message> messages;
         private Button VibratBtn;
         private boolean inThread;
         private Semaphore sem;
@@ -274,13 +277,19 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         public SendBirdChatFragment() {
         }
 
-
+        private void vibrate(Message message) {
+            Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            if(message.getCmd().equals("start"))
+                v.vibrate(100000);
+            if(message.getCmd().equals("stop"))
+                v.cancel();
+        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.sendbird_fragment_group_chat, container, false);
             stopWatch = new StopWatch();
-            messages = new ArrayList<String>();
+            messages = new ArrayList<>();
             inThread = false;
             timeView =(TextView)rootView.findViewById(R.id.textViewTime);
             mChannelUrl = getArguments().getString("channel_url");
@@ -289,13 +298,18 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             Thread thread= new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    long seq =0;
+                    while (true) {
+
+                        Collections.sort(messages);
+                        if(messages.get(0).getSeqNum() == seq +1) {
+                            lock.lock();
+                            seq++;
+                            vibrate(messages.get(0));
+                            messages.remove(0);
+                            lock.unlock();
+                        }
                     }
-                    Collections.sort(messages, String.CASE_INSENSITIVE_ORDER);
-                    ;
                 }
             });
             initUIComponents(rootView);
@@ -351,13 +365,10 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 mAdapter.notifyDataSetChanged();
 
                                 String str = ((UserMessage) baseMessage).getMessage();
-                                messages.add(str);
-                                Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
-                                if (!str.equals("0"))
-                                    v.vibrate(Integer.parseInt(str));
-
-                                else
-                                    v.cancel();
+                                lock.lock();
+                                String[] msg = str.split(":");
+                                messages.add(new Message(Long.parseLong(msg[0]),msg[1],Long.parseLong(msg[3])));
+                                lock.unlock();
                             }
                         }
                     }
@@ -425,7 +436,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
                             // Vibrate for 1000 milliseconds
                             time = System.currentTimeMillis()-stopTime;
-                            send((seqNum++)+":"+"start:"+time);
+                            send((seqNum)+":"+"start:"+time);
+                            seqNum++;
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
 
                             return true;
@@ -435,7 +447,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                             time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
                             //send(time+"");
                             stopTime = System.currentTimeMillis();
-                            send((seqNum++)+":"+"stop:"+time);
+                            send((seqNum)+":"+"stop:"+time);
+                            seqNum++;
                             return true;
                     }
                     return false;
