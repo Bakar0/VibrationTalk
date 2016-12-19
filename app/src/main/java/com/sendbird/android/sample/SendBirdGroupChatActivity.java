@@ -40,6 +40,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.server.converter.StringToIntConverter;
 import com.sendbird.android.AdminMessage;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
@@ -55,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -68,6 +70,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
     private View mSettingsContainer;
     private String mChannelUrl;
     private static long startTime;
+    public static long stopTime;
+    public static long seqNum=1;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -262,7 +266,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
 
         private TextView timeView;
         private StopWatch stopWatch;
-        private String message;
+        private List<String> messages;
         private Button VibratBtn;
         private boolean inThread;
         private Semaphore sem;
@@ -276,13 +280,24 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.sendbird_fragment_group_chat, container, false);
             stopWatch = new StopWatch();
-            message = "";
+            messages = new ArrayList<String>();
             inThread = false;
             timeView =(TextView)rootView.findViewById(R.id.textViewTime);
             mChannelUrl = getArguments().getString("channel_url");
             sem = new Semaphore(1,true);
             lock = new ReentrantLock();
-
+            Thread thread= new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Collections.sort(messages, String.CASE_INSENSITIVE_ORDER);
+                    ;
+                }
+            });
             initUIComponents(rootView);
             return rootView;
         }
@@ -336,9 +351,11 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 mAdapter.notifyDataSetChanged();
 
                                 String str = ((UserMessage) baseMessage).getMessage();
+                                messages.add(str);
                                 Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
                                 if (!str.equals("0"))
                                     v.vibrate(Integer.parseInt(str));
+
                                 else
                                     v.cancel();
                             }
@@ -401,21 +418,24 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
-
+                    long time;
                     switch (motionEvent.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             VibratBtn.setBackgroundResource(R.drawable.pressed);
 
                             // Vibrate for 1000 milliseconds
+                            time = System.currentTimeMillis()-stopTime;
+                            send((seqNum++)+":"+"start:"+time);
                             SendBirdGroupChatActivity.setStartTime(System.currentTimeMillis());
 
                             return true;
                         case MotionEvent.ACTION_UP:
                             VibratBtn.setBackgroundResource(R.drawable.not_pressed);
                             //stop vibration
-                            long time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
-                            send(time+"");
-
+                            time = System.currentTimeMillis() - SendBirdGroupChatActivity.getStartTime();
+                            //send(time+"");
+                            stopTime = System.currentTimeMillis();
+                            send((seqNum++)+":"+"stop:"+time);
                             return true;
                     }
                     return false;
