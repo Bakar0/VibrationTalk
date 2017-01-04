@@ -275,8 +275,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private Semaphore sem;
         private Lock lock;
         public static long seqNum;
-        Thread thread;
-
+        private Thread  thread;
+        private Runnable run;
         public SendBirdChatFragment() {
         }
 
@@ -299,16 +299,16 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             mChannelUrl = getArguments().getString("channel_url");
             sem = new Semaphore(1,true);
             lock = new ReentrantLock();
-
-            thread = new Thread(new Runnable() {
+            run = new Runnable() {
                 @Override
                 public void run() {
                     boolean firstMsg = true;
                     long seq =0;
                     long startTime = System.currentTimeMillis();
+                    //System.currentTimeMillis() - startTime <2000
                     while (System.currentTimeMillis() - startTime <2000) {
-                        Collections.sort(messages);
                         if(!messages.isEmpty()){
+                            Collections.sort(messages);
                             if(firstMsg) {
                                 seq = messages.get(0).getSeqNum()-1;
                                 firstMsg=false;
@@ -324,7 +324,9 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                         }
                     }
                 }
-            });
+            };
+            thread = new Thread();
+            //thread.start();
 
             initUIComponents(rootView);
             return rootView;
@@ -382,8 +384,10 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 String[] msg = str.split(":");
                                 messages.add(new Message(Long.parseLong(msg[0]),msg[1],0L));
                                 lock.unlock();
-                                if(!thread.isAlive())
+                                if(!thread.isAlive()){
+                                    thread = new Thread(run);
                                     thread.start();
+                                }
                             }
                         }
                     }
