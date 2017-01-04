@@ -275,6 +275,8 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         private Semaphore sem;
         private Lock lock;
         public static long seqNum;
+        Thread thread;
+
         public SendBirdChatFragment() {
         }
 
@@ -297,19 +299,25 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
             mChannelUrl = getArguments().getString("channel_url");
             sem = new Semaphore(1,true);
             lock = new ReentrantLock();
-            Thread thread= new Thread(new Runnable() {
+
+            thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    boolean firstMsg = true;
                     long seq =0;
-                    while (true) {
+                    long startTime = System.currentTimeMillis();
+                    while (System.currentTimeMillis() - startTime <2000) {
                         Collections.sort(messages);
                         if(!messages.isEmpty()){
-                            if(messages.get(0).getCmd().equals("SYN"))
-                                seq = messages.get(0).getSeqNum();
+                            if(firstMsg) {
+                                seq = messages.get(0).getSeqNum()-1;
+                                firstMsg=false;
+                            }
                             if(messages.get(0).getSeqNum() == seq +1) {
                                 lock.lock();
                                 seq++;
                                 vibrate(messages.get(0));
+                                startTime = System.currentTimeMillis();
                                 messages.remove(0);
                                 lock.unlock();
                             }
@@ -317,7 +325,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                     }
                 }
             });
-            thread.start();
+
             initUIComponents(rootView);
             return rootView;
         }
@@ -346,7 +354,7 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
         }
 
         private void updateGroupChannelTitle() {
-            ((TextView) getActivity().findViewById(R.id.txt_channel_name)).setText("Group: "+mGroupChannel.getName().toString());
+            ((TextView) getActivity().findViewById(R.id.txt_channel_name)).setText(Helper.getDisplayMemberNames(mGroupChannel.getMembers(), true));
         }
 
         @Override
@@ -369,12 +377,13 @@ public class SendBirdGroupChatActivity extends FragmentActivity {
                                 mGroupChannel.markAsRead();
                                 mAdapter.appendMessage(baseMessage);
                                 mAdapter.notifyDataSetChanged();
-
                                 String str = ((UserMessage) baseMessage).getMessage();
                                 lock.lock();
                                 String[] msg = str.split(":");
-                                messages.add(new Message(Long.parseLong(msg[0]),msg[1],Long.parseLong(msg[2])));
+                                messages.add(new Message(Long.parseLong(msg[0]),msg[1],0L));
                                 lock.unlock();
+                                if(!thread.isAlive())
+                                    thread.start();
                             }
                         }
                     }
