@@ -154,7 +154,7 @@ public class MainActivity extends FragmentActivity {
          * If the minimum SDK version you support is under Android 4.0,
          * you MUST uncomment the below code to receive push notifications.
          */
-//        SendBird.notifyActivityResumedForOldAndroids();
+        SendBird.notifyActivityResumedForOldAndroids();
     }
 
     @Override
@@ -164,7 +164,7 @@ public class MainActivity extends FragmentActivity {
          * If the minimum SDK version you support is under Android 4.0,
          * you MUST uncomment the below code to receive push notifications.
          */
-//        SendBird.notifyActivityPausedForOldAndroids();
+         SendBird.notifyActivityPausedForOldAndroids();
     }
 
     private void setState(State state) {
